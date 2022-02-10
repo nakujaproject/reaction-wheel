@@ -39,13 +39,12 @@ void loop()
   // Kalman filter
   kalRoll = kalmanX.update(accRoll, gyr.XAxis); //required variable
 
-  // View Roll data before in Filter
-  Serial.print("| ");
+  // View Roll data before Filter
   Serial.print(accRoll);
-  Serial.print("\t| ");
+  Serial.print(",");
 
-  // View Roll data after in Filter
+  // View Roll data after Filter
   Serial.print(kalRoll);
-  Serial.println("\t|");
+  Serial.println("");
 
 }

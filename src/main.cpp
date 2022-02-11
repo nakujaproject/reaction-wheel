@@ -44,7 +44,6 @@ void loop()
   Serial.print(",");
 
   // View Roll data after Filter
-  Serial.print(kalRoll);
-  Serial.println("");
+  Serial.println(kalRoll);
 
 }

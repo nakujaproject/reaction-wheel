@@ -48,7 +48,7 @@ float accRoll = 0;
 float kalRoll = 0;
 float pitch = 0;
 
-float Sensitivity = 0.05
+float Sensitivity = 0.05;
 
 void setup() 
 {

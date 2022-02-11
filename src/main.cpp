@@ -5,6 +5,7 @@
 #include <MPU6050.h>
 #include <KalmanFilter.h>
 
+
 MPU6050 mpu;
 
 // motor parameters
@@ -50,6 +51,12 @@ float pitch = 0;
 
 float Sensitivity = 0.05;
 
+
+int motorSpeed(float newValue){
+  firstESC.writeMicroseconds(newValue);
+}
+
+
 void setup() 
 {
   Serial.begin(115200);
@@ -70,9 +77,9 @@ void setup()
 
   balancePID.SetMode(AUTOMATIC);
   balancePID.SetOutputLimits(0,255);
-  Serial.begin(9600)
+  Serial.begin(9600);
 
-   Serial.println("Calibration procedure for Mamba ESC.");
+  Serial.println("Calibration procedure for Mamba ESC.");
   Serial.println("Turn on ESC.");
   firstESC.writeMicroseconds(0);
   Serial.println("Starting Calibration.");
@@ -123,13 +130,13 @@ void loop()
   // View Roll data after Filter
   Serial.println(kalRoll);
 
-  Print
+
 
   //add logic for roll values +/- 180
   
-  float printRoll (float accRoll, float kalRoll) {
+  /* float printRoll (float accRoll, float kalRoll) {
   float prev accRoll
-  }
+  } */
 
   
   Input = kalRoll; //Get Input of PID from Kalman filter
@@ -161,12 +168,6 @@ void loop()
 
 }
 
-int motorSpeed(int newValue){
-  firstESC.writeMicroseconds(newValue);
 
-
-}
-
-}
 
 //add logic for roll values +/- 180

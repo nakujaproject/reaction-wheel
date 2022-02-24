@@ -1,6 +1,3 @@
-//this code seeks to harmonise some of the preexisting code
-//refactoring ongoing
-//changed some of the variables to more descriptive names
 #include <Arduino.h>
 #include <PID_v1.h>
 #include <ESP32Servo.h>
@@ -8,6 +5,8 @@
 #include <MPU6050.h>
 #include <KalmanFilter.h>
 
+#define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
+#define M_PI		3.14159265358979323846
 
 MPU6050 mpu;
 
@@ -53,16 +52,16 @@ float Kd = 1.0;
 PID balancePID(&Input,&Output,&Setpoint,Kp,Ki,Kd,DIRECT);  
 
 int pwm = 0;
-//int valiue2= 0; //not used
+//int valiue2= 0;
 
 KalmanFilter kalmanX(0.001, 0.003, 0.03); //Initialised with angle, rate and bias
 KalmanFilter kalmanY(0.001, 0.003, 0.03);
 
-float accelRoll = 0; //To hold roll calculated form accelerometer
-float kalmanRoll = 0; //To hold roll calculated by fusing gyroscope and accelerometer measurements
-float pitch = 0; 
+float accelRoll = 0.0; //To hold roll calculated form accelerometer
+float kalmanRoll = 0.0; //To hold roll calculated by fusing gyroscope and accelerometer measurements
+float pitch = 0.0; 
 
-//float Sensitivity = 0.05;
+//double Sensitivity = 0.05;
 //To be used to make gyro print only values that change by some margin..
 //if there is need to avoid redundancy
 //the alternative is logging periodically (after a set duration)
@@ -71,6 +70,24 @@ float pitch = 0;
 void write_pwm(float speed){
   firstESC.writeMicroseconds(speed);
  // return speed;
+}
+
+void calibrateESC () {
+   Serial.println("Calibration procedure for Mamba ESC.");
+  Serial.println("Turn on ESC.");
+  firstESC.writeMicroseconds(0);
+  Serial.println("Starting Calibration.");
+  delay(5000);
+  firstESC.writeMicroseconds(1832);
+  Serial.println("Writing Full Throttle.");
+  delay(5000);
+  firstESC.writeMicroseconds(1312);
+  Serial.println("Writing Full Reverse.");
+  delay(5000);
+  firstESC.writeMicroseconds(1488);
+  Serial.println("Writing Neutral.");
+  delay(1000);
+  Serial.println("Calibration Complete.");
 }
 
 
@@ -97,21 +114,7 @@ void setup()
                                         //and 1488, 1832 for direct
   Serial.begin(9600);
 
-  Serial.println("Calibration procedure for Mamba ESC.");
-  Serial.println("Turn on ESC.");
-  firstESC.writeMicroseconds(0);
-  Serial.println("Starting Calibration.");
-  delay(5000);
-  firstESC.writeMicroseconds(1832);
-  Serial.println("Writing Full Throttle.");
-  delay(5000);
-  firstESC.writeMicroseconds(1312);
-  Serial.println("Writing Full Reverse.");
-  delay(5000);
-  firstESC.writeMicroseconds(1488);
-  Serial.println("Writing Neutral.");
-  delay(1000);
-  Serial.println("Calibration Complete.");
+ calibrateESC();
 
 }
 
@@ -132,9 +135,7 @@ void loop()
   accelRoll  = (atan2(acc.YAxis, acc.ZAxis)*180.0)/M_PI; // actual roll
   //calculating pitch
   pitch = -(atan2(acc.XAxis, sqrt(acc.YAxis*acc.YAxis + acc.ZAxis*acc.ZAxis))*180.0)/M_PI;
-  //does readNormalizeGyro incorporate a low pass filter
-  //if not include smooth, average value, loc variable and 
-  //gyr.XAxis = abs(smooth(readGyro(),filterVal,smoothedVal));
+  
 
   // Kalman filter fuses accelerometer and gyro xaxis values
   kalmanRoll = kalmanX.update(accelRoll, gyr.XAxis); //required variable
@@ -158,12 +159,12 @@ void loop()
   // }
   // if(Input < 15000){
   //   balancePID.SetControllerDirection(DIRECT);
-  }
+  
   Serial.print("Average Value (X): "); 
   Serial.println(Input);
-  balancePID.Compute(); //this function calculates error and hence Output of pid
-  if(abs(Input) > 15000){  //15000 represents max of raw gyroscope values
-  //TODO: Change to suitable filtered/smoothed/manipulated equivalent
+  balancePID.Compute();                   //this function calculates error and hence Output of pid
+  if(abs(Input) > 15000){                //15000 represents max of raw gyroscope values
+                                          //TODO: Change to suitable filtered/smoothed/manipulated equivalent
 
     pwm = map(Output, 0, 255, 1488, 1832); //map the output 
   }
@@ -172,8 +173,9 @@ void loop()
   }
 
   //changed from motorspeed
-  write_pwm(constraint(pwm, 1312, 1832)); //ensure pwm values is within limits required by esc
-  Serial.println(pwm);
+  int constrainedpwm = constrain(pwm, 1312, 1832);
+  write_pwm(constrainedpwm); //Ensure pwm values is within limits required by ESC
+  Serial.println(constrainedpwm);
  
 
 
@@ -182,17 +184,17 @@ void loop()
 
 
 //add logic for roll values +/- 180
-//add globals and logic for logging only changing/nonstill outputs
-//use Sensitivity variable
-
-//What is the need for low pass filtering and smoothing
-//needed when reading raw values, and does using ReadNormalizeAcel really make them redundant
-//is the bitshifting causing problems with raw values
+//add globals and logic for logging only changing/nonstill outputs, use Sensitivity variable
+//Is low pass filtering and smoothing a gamechanger
+//Set up own calibration and offsets for gyro, read using wire, smooth, filter (process the raw values). Offsets so it reads 0 when flat.
+//Is unpredictable bitshifting in Wire.read()<<|8 causing problems with raw values
  //remove the printline from setup and use a boolean to print once in testing
- 
+ //use printlabel function
+ //calibrateESC function
  //add logic for roll values +/- 180
   
-  /* float printRoll (float accelRoll, float kalmanRoll) {
+  //one printCSV function
+  /* float printcsv (float accelRoll, float kalmanRoll) {
   float prev accelRoll
   } 
   */

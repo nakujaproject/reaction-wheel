@@ -1,4 +1,5 @@
 #include <Arduino.h>
+//#include <Streaming.h>
 #include <PID_v1.h>
 #include <ESP32Servo.h>
 #include <Wire.h>
@@ -9,6 +10,8 @@
 #define M_PI		3.14159265358979323846
 
 MPU6050 mpu;
+
+bool Label = true;
 
 // motor parameters
 //These values were set when programming the BhHeli ESC
@@ -43,8 +46,8 @@ int average = 0;                // the average
 */
 
 //int goal = 300; 
-double Input;
-double Output;
+double Input = 0;
+double Output = 0;
 double Setpoint = 0;
 float Kp = 1.0;
 float Ki = 0.0;
@@ -57,9 +60,9 @@ int pwm = 0;
 KalmanFilter kalmanX(0.001, 0.003, 0.03); //Initialised with angle, rate and bias
 KalmanFilter kalmanY(0.001, 0.003, 0.03);
 
-float accelRoll = 0.0; //To hold roll calculated form accelerometer
-float kalmanRoll = 0.0; //To hold roll calculated by fusing gyroscope and accelerometer measurements
-float pitch = 0.0; 
+float accelRoll = 0; //To hold roll calculated form accelerometer
+float kalmanRoll = 0; //To hold roll calculated by fusing gyroscope and accelerometer measurements
+float pitch = 0; 
 
 //double Sensitivity = 0.05;
 //To be used to make gyro print only values that change by some margin..
@@ -77,17 +80,21 @@ void calibrateESC () {
   Serial.println("Turn on ESC.");
   firstESC.writeMicroseconds(0);
   Serial.println("Starting Calibration.");
-  delay(5000);
+  delay(1000);
   firstESC.writeMicroseconds(1832);
   Serial.println("Writing Full Throttle.");
-  delay(5000);
+  delay(1000);
   firstESC.writeMicroseconds(1312);
   Serial.println("Writing Full Reverse.");
-  delay(5000);
+  delay(1000);
   firstESC.writeMicroseconds(1488);
   Serial.println("Writing Neutral.");
   delay(1000);
   Serial.println("Calibration Complete.");
+}
+
+void printLabel() {
+Serial.println("| accelRoll \t | gyr.XAxis \t | kalmanRoll\t| Output\t | pwm\t|");
 }
 
 
@@ -105,12 +112,11 @@ void setup()
   mpu.calibrateGyro();// If you don't want to calibrate, comment on this line.
 
   // Create a label on each output. 
-  Serial.println("| accelRoll \t| kalmanRoll\t|");
-
+  
   firstESC.attach(14);  //49
 
   balancePID.SetMode(AUTOMATIC); //
-  balancePID.SetOutputLimits(1312,1488); //Investigating use of map instead of setlimits for this reverse relationship
+  balancePID.SetOutputLimits(0,255); //Investigating use of map instead of setlimits for this reverse relationship
                                         //and 1488, 1832 for direct
   Serial.begin(9600);
 
@@ -118,18 +124,19 @@ void setup()
 
 }
 
+
 void loop()
 {
 
- 
+  while(Label){
+  printLabel();
+  delay(5000);
+  Label = false;
+  }
 
   //Vector has been defined as a struct in MPU6050.h
   Vector acc = mpu.readNormalizeAccel();
   Vector gyr = mpu.readNormalizeGyro();
-
-  //print gyro roll for comparison with accelRoll and kaRroll
-  Serial.println("gyr.XAxis");
-
 
   // Calculating Roll from accelerometer (degrees)
   accelRoll  = (atan2(acc.YAxis, acc.ZAxis)*180.0)/M_PI; // actual roll
@@ -141,11 +148,18 @@ void loop()
   kalmanRoll = kalmanX.update(accelRoll, gyr.XAxis); //required variable
 
   // View Roll data before Filter
+
+/*
   Serial.print(accelRoll);
   Serial.print(",");
-
-  // View Roll data after Filter
+  delay(1000);
+  Serial.print (gyr.XAxis);
+  Serial.print(",");
+  delay(1000);
   Serial.println(kalmanRoll);
+  //Serial.print(",");
+    delay(1000); 
+    */
 
   Input = kalmanRoll; //Get Input of PID from Kalman filter
   if(Input < 0){
@@ -160,9 +174,13 @@ void loop()
   // if(Input < 15000){
   //   balancePID.SetControllerDirection(DIRECT);
   
-  Serial.print("Average Value (X): "); 
-  Serial.println(Input);
-  balancePID.Compute();                   //this function calculates error and hence Output of pid
+  balancePID.Compute(); 
+  /*
+  Serial.print("Output: ");
+  Serial.println(Output);
+  delay(1000); */
+
+                    //this function calculates error and hence Output of pid, but returns A BOOLEAN
   if(abs(Input) > 15000){                //15000 represents max of raw gyroscope values
                                           //TODO: Change to suitable filtered/smoothed/manipulated equivalent
 
@@ -175,8 +193,14 @@ void loop()
   //changed from motorspeed
   int constrainedpwm = constrain(pwm, 1312, 1832);
   write_pwm(constrainedpwm); //Ensure pwm values is within limits required by ESC
+  /* 
+  Serial.print("Constrained pwm:  ");
   Serial.println(constrainedpwm);
- 
+    delay(1000);
+    */
+
+
+ Serial.println("Done");
 
 
 }
@@ -198,3 +222,7 @@ void loop()
   float prev accelRoll
   } 
   */
+
+ //COMPUTE RETURNS BOOLEAN
+ //Implement controller direction change when setpoint < 0;
+ //setsampletime . ki*this, kd/this

@@ -24,6 +24,10 @@
 MPU6050 mpu;
 //MPU6050 mpu(0x69); // <-- use for AD0 high
 
+int16_t ax, ay, az;
+int16_t gx, gy, gz;
+int16_t accData[3], gyrData[3];
+
 Servo ESC;
 
 int neutral = 1488; 
@@ -331,7 +335,9 @@ void loop() {
             mpu.dmpGetQuaternion(&q, fifoBuffer);
             mpu.dmpGetGravity(&gravity, &q);
             mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-         
+        
+        mpu.getMotion6(&accData[0], &accData[1], &accData[2], &gyrData[0], &gyrData[1], &gyrData[2]);
+        
         Input = ypr[0] * 180/M_PI; 
         timePrev = timeCur;
         timeCur = millis();

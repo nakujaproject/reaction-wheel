@@ -1,0 +1,27 @@
+Physical Properties for Reaction_wheel_dr - Copy (3.3)
+General Properties:
+	Material:	{Steel, Carbon}
+	Density:	7.850 g/cm^3
+	Mass:	0.186 kg (Relative Error = 0.209661%)
+	Area:	8669.149 mm^2 (Relative Error = 0.000000%)
+	Volume:	23757.693 mm^3 (Relative Error = 0.209661%)
+Center of Gravity:
+	X:	9.464 mm (Relative Error = 0.209661%)
+	Y:	0.000 mm (Relative Error = 0.209661%)
+	Z:	-0.000 mm (Relative Error = 0.209661%)
+Mass Moments of Inertia with respect to Center of Gravity(Calculated using negative integral)
+	Ixx        	79.222 kg mm^2 (Relative Error = 0.209661%)
+	Iyx Iyy    	0.000 kg mm^2 (Relative Error = 0.209661%)	46.182 kg mm^2 (Relative Error = 0.209661%)
+	Izx Izy Izz	0.000 kg mm^2 (Relative Error = 0.209661%)	-0.000 kg mm^2 (Relative Error = 0.209661%)	46.182 kg mm^2 (Relative Error = 0.209661%)
+Mass Moments of Inertia with respect to Global(Calculated using negative integral)
+	Ixx        	79.222 kg mm^2 (Relative Error = 0.209661%)
+	Iyx Iyy    	-0.000 kg mm^2 (Relative Error = 0.209661%)	62.885 kg mm^2 (Relative Error = 0.209661%)
+	Izx Izy Izz	0.000 kg mm^2 (Relative Error = 0.209661%)	-0.000 kg mm^2 (Relative Error = 0.209661%)	62.885 kg mm^2 (Relative Error = 0.209661%)
+Principal Moments of Inertia with respect to Center of Gravity
+	I1:	79.222 kg mm^2 (Relative Error = 0.209661%)
+	I2:	46.182 kg mm^2 (Relative Error = 0.209661%)
+	I3:	46.182 kg mm^2 (Relative Error = 0.209661%)
+Rotation from Global to Principal
+	Rx:	0.01 deg (Relative Error = 0.209661%)
+	Ry:	0.00 deg (Relative Error = 0.209661%)
+	Rz:	0.00 deg (Relative Error = 0.209661%)

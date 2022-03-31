@@ -17,7 +17,7 @@ void loop() {
  unsigned long start = millis();
   readMPU();
   
-PIDloop(double Input);
+PIDloop(Input);
 readPWM();
  write_pwm(pwm);
   

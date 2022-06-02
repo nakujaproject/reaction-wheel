@@ -194,8 +194,8 @@ void appendFile(fs::FS &fs, const char * path, const char * message){
 void setup() {
     // join I2C bus (I2Cdev library doesn't do this automatically)
     #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
-        Wire.begin(SDA, SCL, 400000);
-        //Wire.setClock(400000); // 400kHz I2C clock. Comment this line if having compilation difficulties
+        Wire.begin(SDA, SCL);
+        Wire.setClock(400000); // 400kHz I2C clock. Comment this line if having compilation difficulties
     #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
         Fastwire::setup(400, true);
     #endif

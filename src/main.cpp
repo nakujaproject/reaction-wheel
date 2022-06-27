@@ -6,6 +6,8 @@
 #include "SPI.h"
 #define SD_CS 5
 
+#include "telemetry.h"
+
 
 // I2Cdev and MPU6050 must be installed as libraries, or else the .cpp/.h files
 // for both classes must be in the include path of your project
@@ -130,7 +132,7 @@ void calibrateESC () {
   ESC.writeMicroseconds(1832);
   //Serial.println("Writing Full Throttle.");
   delay(1000);
-  ESC.writeMicroseconds(1312);
+  ESC.writeMicroseconds(1148);
   //Serial.println("Writing Full Reverse.");
   delay(1000);
   ESC.writeMicroseconds(1488);
@@ -289,7 +291,7 @@ void setup() {
         //serial.println("UNKNOWN");
     }
 
-    uint64_t cardSize = SD.cardSize() / (1024 * 1024);
+    //uint64_t cardSize = SD.cardSize() / (1024 * 1024);
     //serial.printf("SD Card Size: %lluMB\n", cardSize);
 
 
@@ -317,6 +319,9 @@ void setup() {
 
 
     
+    //telemetry
+    ConnectWifi();
+    ListenUDP();
 
 }
 
@@ -345,6 +350,18 @@ void loop() {
         elapsedTime = timeCur - timePrev;
         rollVel = ((angleCur-anglePrev)/(elapsedTime/1000.00));
             
+        struct SensorData sdt;
+        sdt.accel[0] = accData[0];
+        sdt.accel[1] = accData[1];
+        sdt.accel[2] = accData[2];
+        sdt.gyro[0] = gyrData[0];
+        sdt.gyro[1] = gyrData[1];
+        sdt.gyro[2] = gyrData[2];
+        sdt.ypr[0] = ypr[0];
+        sdt.ypr[1] = ypr[1];
+        sdt.ypr[2] = ypr[2];
+
+        PublishSensorDataUDP(sdt);
             
                   
 

@@ -34,7 +34,7 @@ Servo ESC;
 
 int neutral = 1488; 
 int fullForward = 1832; 
-int fullReverse = 1312;
+int fullReverse = 1148;
 
 
 //long timeCur, timePrev, timeStart; 
@@ -124,70 +124,10 @@ double constrainpwm (double pwm, double Min, double Max){
 }
 
 void calibrateESC () {
-   //Serial.println("Calibration procedure for Mamba ESC.");
-  //Serial.println("Turn on ESC.");
-  ESC.writeMicroseconds(0);
-  //Serial.println("Starting Calibration.");
-  delay(1000);
-  ESC.writeMicroseconds(1832);
-  //Serial.println("Writing Full Throttle.");
-  delay(1000);
-  ESC.writeMicroseconds(1148);
-  //Serial.println("Writing Full Reverse.");
-  delay(1000);
-  ESC.writeMicroseconds(1488);
- // Serial.println("Writing Neutral.");
-  delay(1000);
-  //Serial.println("Calibration Complete.");
-}
-void readFile(fs::FS &fs, const char * path){
-    //serial.printf("Reading file: %s\n", path);
-
-    File file = fs.open(path);
-    if(!file){
-        //serial.println("Failed to open file for reading");
-        return;
-    }
-
-    //serial.print("Read from file: ");
-    while(file.available()){
-        Serial.write(file.read());
-    }
-    file.close();
-}
-//writing to the SD card
-void writeFile(fs::FS &fs, const char * path, const char * message){
-    //serial.printf("Writing file: %s\n", path);
-
-    File file = fs.open(path, FILE_WRITE);
-    if(!file){
-        //serial.println("Failed to open file for writing");
-        return;
-    }
-    if(file.print(message)){
-        //serial.println("File written");
-    } else {
-        //serial.println("Write failed");
-    }
-    file.close();
-}
-//-----Appending the file to the SD card
-void appendFile(fs::FS &fs, const char * path, const char * message){
-    //serial.printf("Appending to file: %s\n", path);
-
-    File file = fs.open(path, FILE_APPEND);
-    if(!file){
-        //serial.println("Failed to open file for appending");
-        return;
-    }
-    if(file.print(message)){
-        //serial.println("Message appended");
-    } else {
-        //serial.println("Append failed");
-    }
-    file.close();
-}
-
+  ESC.writeMicroseconds(1000);
+  delay(2000);
+  ESC.writeMicroseconds(2000);
+  delay(1000);}
 
 // ================================================================
 // ===                      INITIAL SETUP                       ===
@@ -269,63 +209,11 @@ void setup() {
 
  //Initialising the SD card in the setup
     Serial.begin(115200);
-    if(!SD.begin()){
-        //serial.println("Card Mount Failed");
-        return;
-    }
-    uint8_t cardType = SD.cardType();
-
-    if(cardType == CARD_NONE){
-        //serial.println("No SD card attached");
-        return;
-    }
-
-    //serial.print("SD Card Type: ");
-    if(cardType == CARD_MMC){
-        //serial.println("MMC");
-    } else if(cardType == CARD_SD){
-        //serial.println("SDSC");
-    } else if(cardType == CARD_SDHC){
-        //serial.println("SDHC");
-    } else {
-        //serial.println("UNKNOWN");
-    }
-
-    //uint64_t cardSize = SD.cardSize() / (1024 * 1024);
-    //serial.printf("SD Card Size: %lluMB\n", cardSize);
-
-
-
-// If the data.txt file doesn't exist
-  // Create a file on the SD card and write the data labels
-  File file = SD.open("/hello.txt");
-  if(!file) {
-    //serial.println("File doesn't exist");
-    //serial.println("Creating file...");
-    writeFile(SD, "/hello.txt", "Roll, RollVelocity, PWM \r\n");
-  }
-  else {
-    //serial.println("File already exists");  
-  }
-  file.close();
-       
-    writeFile(SD, "/hello.txt", "Hello ");
-    appendFile(SD, "/hello.txt", "World!\n");
-    readFile(SD, "/hello.txt");
-   // readFile(SD, "/foo.txt");
-    
-    //serial.printf("Total space: %lluMB\n", SD.totalBytes() / (1024 * 1024));
-    //serial.printf("Used space: %lluMB\n", SD.usedBytes() / (1024 * 1024));
-
-
     
     //telemetry
     ConnectWifi();
     ListenUDP();
-
 }
-
-
 
 // ================================================================
 // ===                    MAIN PROGRAM LOOP                     ===
@@ -421,12 +309,6 @@ void loop() {
         //Serial.println("Done");
 
         dataMessage = String(Input) + "," + String(rollVel) + "," + String(pwm) + "\r\n";
-    //serial.print("Saving data: ");
-    //serial.println(dataMessage);
-
-    //Append the data to file
-    appendFile(SD, "/hello.txt", dataMessage.c_str());
-
         
     }
     }

@@ -7,9 +7,9 @@
 
 // motor parameters
 
-int neutral = 1300;
-int fullForward = 2600;
-int fullReverse = 0;
+int neutral = 1488;
+int fullForward = 1832;
+int fullReverse = 1312;
 
 int sensVal;           
 float filterVal = 0.001;      
@@ -19,11 +19,11 @@ int i, j;
 
 Servo firstESC;
 const int MPU=0x68;  
-int16_t AcX,AcY,AcZ,Tmp,GyX,GyY,GyZ;
+int16_t AcX,AcY,AcZ,GyX,GyY,GyZ;
 const int numReadings = 10;
 
 int readings[numReadings];      
-int index = 0;                
+int loc = 0;                
 int total = 0;                  // the running total
 int average = 0;                // the average
 
@@ -40,30 +40,31 @@ int value = 0;
 int valiue2= 0;
 
 void setup(){
+  pinMode(14, OUTPUT);
   Wire.begin();
   Wire.beginTransmission(MPU);
   Wire.write(0x6B);  
   Wire.write(0);     
   Wire.endTransmission(true);
-  firstESC.attach(9);    
+  firstESC.attach(14);    
   balancePID.SetMode(AUTOMATIC);
   balancePID.SetOutputLimits(0,255);
   Serial.begin(9600);         
   
   Serial.println("Calibration procedure for Mamba ESC.");
   Serial.println("Turn on ESC.");
-  firstESC.writeMicroseconds(0);
+  firstESC.writeMicroseconds(1312);
   Serial.println("Starting Calibration.");
   delay(5000);
-  firstESC.writeMicroseconds(2600);
+  firstESC.writeMicroseconds(1832);
   Serial.println("Writing Full Throttle.");
   delay(5000);
-  firstESC.writeMicroseconds(0);
+  firstESC.writeMicroseconds(1312);
   Serial.println("Writing Full Reverse.");
   delay(5000);
-  firstESC.writeMicroseconds(1300);
+  firstESC.writeMicroseconds(1488);
   Serial.println("Writing Neutral.");
-  delay(10000);
+  delay(1000);
   Serial.println("Calibration Complete.");
 
 
@@ -109,12 +110,12 @@ int motorSpeed(int newValue){
 }
 
 int averageValue(int GyX){
-    total= total - readings[index];
-    readings[index] = GyX;
-    total= total + readings[index];     
-    index = index + 1;                    
-    if (index >= numReadings){              
-      index = 0;                          
+    total= total - readings[loc];
+    readings[loc] = GyX;
+    total= total + readings[loc];     
+    loc+=1;                    
+    if (loc >= numReadings){              
+      loc = 0;                          
     }
     average = total / numReadings;  
     //Serial.print("Average Value (X): ");Serial.println(average); 
@@ -130,7 +131,7 @@ int readGyro(){
   AcX=Wire.read()<<8|Wire.read();  // 0x3B (ACCEL_XOUT_H) & 0x3C (ACCEL_XOUT_L)     
   AcY=Wire.read()<<8|Wire.read();  // 0x3D (ACCEL_YOUT_H) & 0x3E (ACCEL_YOUT_L)
   AcZ=Wire.read()<<8|Wire.read();  // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
-  Tmp=Wire.read()<<8|Wire.read();  // 0x41 (TEMP_OUT_H) & 0x42 (TEMP_OUT_L)
+  //Tmp=Wire.read()<<8|Wire.read();  // 0x41 (TEMP_OUT_H) & 0x42 (TEMP_OUT_L)
   GyX=Wire.read()<<8|Wire.read();  // 0x43 (GYRO_XOUT_H) & 0x44 (GYRO_XOUT_L)
   GyY=Wire.read()<<8|Wire.read();  // 0x45 (GYRO_YOUT_H) & 0x46 (GYRO_YOUT_L)
   GyZ=Wire.read()<<8|Wire.read();  // 0x47 (GYRO_ZOUT_H) & 0x48 (GYRO_ZOUT_L)

@@ -1,0 +1,26 @@
+syntax = "proto3";
+option go_package = "/models";
+
+message GyroRaw {
+    float x = 1;
+    float y = 2;
+    float z = 3;
+}
+
+message AccRaw {
+    float x = 1;
+    float y = 2;
+    float z = 3;
+}
+
+message Angles {
+    float x = 1;
+    float y = 2;
+}
+
+message SensorEvent {
+    GyroRaw gyroRaw = 1;
+    AccRaw accRaw = 2;
+    Angles angles = 3;
+    float esc = 4;
+}

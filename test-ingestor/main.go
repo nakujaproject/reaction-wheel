@@ -35,6 +35,7 @@ func main() {
 		fmt.Printf("received: %s from %s\n", data, remote)
 
 		go writeToFile(dataWriter, data)
+		conn.WriteToUDP(message, remote)
 	}
 
 }
